@@ -1,14 +1,3 @@
-<?php
-if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
-  http_response_code(405);
-  header('allow: GET, HEAD');
-  echo '<h1>405 Method Not Allowed</h1>';
-  exit();
-}
-?>
-<?php
-// $urls = array(array("long_url" => "http://lighthouselabs.ca", "short_url" => "b2xVn2"), array("long_url" => "http://google.com", "short_url" => "9sm5xK"))
-?>
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -25,28 +14,28 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
       integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS"
       crossorigin="anonymous"
     />
-    <title>TinyApp</title>
+
+    <title>New URL - TinyApp Example</title>
   </head>
+
   <body>
-    <?php include "./includes/_header.html" ?>
+    <?php include './includes/_header.html' ?>
+
     <main style="margin: 1em;">
-      <h3>My URLs</h3>
-      <table class="table">
-        <thead>
-          <tr>
-            <th scope="col">Short URL ID</th>
-            <th scope="col">Long URL</th>
-          </tr>
-        </thead>
-        <tbody>
-          <?php foreach ($urls as $index => $url) { ?>
-              <tr>
-                <td><?php echo $url["short_url"] ?></td>
-                <td><?php echo $url["long_url"] ?></td>
-              </tr>
-          <?php } ?>
-        </tbody>
-      </table>
+      <h3>Create TinyURL</h3>
+      <form class="form-inline" action="/urls" method="POST">
+        <div class="form-group mb-2">
+          <label for="longURL">Enter a URL:</label>
+          <input
+            class="form-control"
+            type="text"
+            name="longURL"
+            placeholder="http://"
+            style="width: 300px; margin: 1em"
+          />
+          <button type="submit" class="btn btn-primary">Submit</button>
+        </div>
+      </form>
     </main>
     <!-- Bootstrap JS -->
     <script

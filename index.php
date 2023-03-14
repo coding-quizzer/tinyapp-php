@@ -1,6 +1,6 @@
 <?php
 
-define("urls", array(array("long_url" => "http://lighthouselabs.ca", "short_url" => "b2xVn2"), array("long_url" => "http://google.com", "short_url" => "9sm5xK"), 5 => array("long_url" => 'youtube.com', "short_url" => "are45")));
+$urls = array(array("long_url" => "http://lighthouselabs.ca", "short_url" => "b2xVn2"), array("long_url" => "http://google.com", "short_url" => "9sm5xK"), 2 => array("long_url" => 'youtube.com', "short_url" => "are45"));
 
 
 // First define some routes for the application
@@ -14,7 +14,7 @@ $routes = [
   ],
   [
     'string' => '/urls',
-    'methods' => ['GET', 'HEAD'],
+    'methods' => ['GET', 'POST', 'HEAD'],
     'function' => 'index'
   ],
   [
@@ -34,7 +34,9 @@ $routes = [
 // -------------------
 $parsed_url = parse_url($_SERVER['REQUEST_URI']);
 $requested_path = $parsed_url['path'];
-$requested_path = rtrim($requested_path, "/");
+if ($requested_path != "/") {
+  $requested_path = rtrim($requested_path, "/");
+}
 foreach ($routes as $route) {
   // Verify that used paramaters are allowed by requested resource
   // Note... A POST request can also contain GET parameters
@@ -64,11 +66,15 @@ foreach ($routes as $route) {
     throw new Exception("Missing required parameter (string or pattern) in route.");
   }
 
+
+
   // Check that the request method is supported
   if (!in_array($_SERVER['REQUEST_METHOD'], $route['methods'])) {
+    echo 'Invalid Method';
+    echo implode(' ', $route['methods']);
     respond(
       405,
-      '<h1>405 Method Not Allowed</h1>',
+      '<h1>405 Method Not Allowed. Please Try again.</h1>',
       ['allow' => implode(', ', $route['methods'])]
     );
   }
@@ -86,9 +92,10 @@ foreach ($routes as $route) {
 
     // If we got any RegEx matches
     if (isset($matches[0])) {
-      call_user_func('feature_' . $route['function'], $matches);
+      call_user_func('feature_' . $route['function'], $matches, $urls);
     } else {
-      call_user_func('feature_' . $route['function']);
+
+      call_user_func('feature_' . $route['function'], $urls);
     }
   } else {
     throw new Exception("Missing required parameter (function) in route.");
@@ -101,30 +108,54 @@ respond(404, '<h1>404 Not Found</h1><p>Page not recognized...</p>');
 // ------------------
 // ---- Functions ---
 // ------------------
-function feature_index()
+function feature_index($urls)
 {
-  ob_start();
-  include './url_index.php';
-  $content = ob_get_clean();
-  respond(200, $content);
+  if ($_SERVER['REQUEST_METHOD'] == 'GET') {
+    ob_start();
+
+    include './url_index.php';
+    $content = ob_get_clean();
+    respond(200, $content);
+  }
+
+  if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    $new_long_url = $_POST['longURL'];
+    $new_short_url = uniqid();
+    array_push($urls, array("long_url" => $new_long_url, "short_url" => $new_short_url));
+    $content = "{\"long_url\": \"";
+    $content .= $new_long_url;
+    $content .= "\", \"short_url\": \"";
+    $content .= $new_short_url;
+    $content .= "\" }";
+    respond(200, $content, ['content-type' => 'application/json']);
+  }
+
 }
 
 echo 'All Matches' . $matches;
-function feature_show($matches)
+function feature_show($matches, $urls)
 {
   // define('short_url', "9sm5xK");
   // define('long_url', "http://www.google.com");
   $split_path = explode('/', $matches[0]);
   define('short_url', $split_path[2]);
-  $short_urls = array_column(urls, 'short_url');
+  $short_urls = array_column($urls, 'short_url');
   $url_index = array_search(short_url, $short_urls);
   if ($url_index === false) {
     respond(404, '<h1>404 Not Found</h1><p>Could not find the short url: ' . short_url . '.</p>');
   }
-  define('long_url', urls[$url_index]['long_url']);
+  define('long_url', $urls[$url_index]['long_url']);
 
   ob_start();
   include './url_show.php';
+  $content = ob_get_clean();
+  respond(200, $content);
+}
+
+function feature_new()
+{
+  ob_start();
+  include './url_new.php';
   $content = ob_get_clean();
   respond(200, $content);
 }
