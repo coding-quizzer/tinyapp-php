@@ -1,7 +1,7 @@
 <?php
 
-$urls = array(array("long_url" => "http://lighthouselabs.ca", "short_url" => "b2xVn2"), array("long_url" => "http://google.com", "short_url" => "9sm5xK"), 2 => array("long_url" => 'youtube.com', "short_url" => "are45"));
-
+// $urls = array(array("long_url" => "http://lighthouselabs.ca", "short_url" => "b2xVn2"), array("long_url" => "http://google.com", "short_url" => "9sm5xK"), 5 => array("long_url" => 'http://youtube.com', "short_url" => "are45"));
+include_once 'initial_urls.php';
 
 // First define some routes for the application
 // (Based on tutorial at https://beamtic.com/creating-a-router-in-php)
@@ -110,24 +110,27 @@ respond(404, '<h1>404 Not Found</h1><p>Page not recognized...</p>');
 // ------------------
 function feature_index($urls)
 {
-  if ($_SERVER['REQUEST_METHOD'] == 'GET') {
-    ob_start();
-
-    include './url_index.php';
-    $content = ob_get_clean();
-    respond(200, $content);
-  }
 
   if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $new_long_url = $_POST['longURL'];
     $new_short_url = uniqid();
     array_push($urls, array("long_url" => $new_long_url, "short_url" => $new_short_url));
+
     $content = "{\"long_url\": \"";
     $content .= $new_long_url;
     $content .= "\", \"short_url\": \"";
     $content .= $new_short_url;
     $content .= "\" }";
-    respond(200, $content, ['content-type' => 'application/json']);
+    respond(303, $content, ['Location' => '/urls']);
+  }
+
+
+  if ($_SERVER['REQUEST_METHOD'] == 'GET') {
+
+    ob_start();
+    include './url_index.php';
+    $content = ob_get_clean();
+    respond(200, $content);
   }
 
 }
@@ -139,12 +142,18 @@ function feature_show($matches, $urls)
   // define('long_url', "http://www.google.com");
   $split_path = explode('/', $matches[0]);
   define('short_url', $split_path[2]);
-  $short_urls = array_column($urls, 'short_url');
-  $url_index = array_search(short_url, $short_urls);
-  if ($url_index === false) {
+  $url_data = array_find_with_callback($urls, function ($value) use ($matches) {
+    $value['long_url'] == $matches[0];
+  });
+  // $short_urls = array_column($urls, 'short_url');
+  // $url_index = array_search(short_url, $short_urls);
+  if ($url_data === false) {
     respond(404, '<h1>404 Not Found</h1><p>Could not find the short url: ' . short_url . '.</p>');
   }
-  define('long_url', $urls[$url_index]['long_url']);
+
+  $url_key = $url_data['key'];
+
+  define('long_url', $urls[$url_key]['long_url']);
 
   ob_start();
   include './url_show.php';
@@ -191,6 +200,18 @@ function handle_parameters($allowed_parameters, $post_or_get_parameters)
     echo '</pre>';
     exit();
   }
+}
+
+function array_find_with_callback($array, $callback)
+{
+  $index = 0;
+  foreach ($array as $key => $value) {
+    if ($callback($value)) {
+      return array('index' => $index, 'key' => $key, 'value' => $value);
+    }
+    $index++;
+  }
+  return false;
 }
 
 ?>

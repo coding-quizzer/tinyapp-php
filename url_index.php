@@ -1,13 +1,10 @@
 <?php
-if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
-  http_response_code(405);
-  header('allow: GET, HEAD');
-  echo '<h1>405 Method Not Allowed</h1>';
-  exit();
-}
-?>
-<?php
-// $urls = array(array("long_url" => "http://lighthouselabs.ca", "short_url" => "b2xVn2"), array("long_url" => "http://google.com", "short_url" => "9sm5xK"))
+// if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
+//   http_response_code(405);
+//   header('allow: GET, HEAD');
+//   echo '<h1>405 Method Not Allowed</h1>';
+//   exit();
+// }
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -31,6 +28,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
     <?php include "./includes/_header.html" ?>
     <main style="margin: 1em;">
       <h3>My URLs</h3>
+      <p> Length = <?php echo count($urls) ?> </p>
       <table class="table">
         <thead>
           <tr>
@@ -40,10 +38,10 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
         </thead>
         <tbody>
           <?php foreach ($urls as $index => $url) { ?>
-              <tr>
-                <td><?php echo $url["short_url"] ?></td>
-                <td><?php echo $url["long_url"] ?></td>
-              </tr>
+                            <tr>
+                              <td><?php echo $url["short_url"] ?></td>
+                              <td><?php echo $url["long_url"] ?></td>
+                            </tr>
           <?php } ?>
         </tbody>
       </table>
