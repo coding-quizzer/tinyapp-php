@@ -38,10 +38,10 @@
         </thead>
         <tbody>
           <?php foreach ($urls as $index => $url) { ?>
-                            <tr>
-                              <td><?php echo $url["short_url"] ?></td>
-                              <td><?php echo $url["long_url"] ?></td>
-                            </tr>
+            <tr>
+              <td><?php echo $url["short_url"] ?></td>
+              <td><?php echo $url["long_url"] ?></td>
+            </tr>
           <?php } ?>
         </tbody>
       </table>
