@@ -1,7 +1,7 @@
 <?php
 
 // $urls = array(array("long_url" => "http://lighthouselabs.ca", "short_url" => "b2xVn2"), array("long_url" => "http://google.com", "short_url" => "9sm5xK"), 5 => array("long_url" => 'http://youtube.com', "short_url" => "are45"));
-include_once 'initial_urls.php';
+include_once './views/initial_urls.php';
 
 // First define some routes for the application
 // (Based on tutorial at https://beamtic.com/creating-a-router-in-php)
@@ -128,7 +128,7 @@ function feature_index($urls)
   if ($_SERVER['REQUEST_METHOD'] == 'GET') {
 
     ob_start();
-    include './url_index.php';
+    include './views/url_index.php';
     $content = ob_get_clean();
     respond(200, $content);
   }
@@ -156,7 +156,7 @@ function feature_show($matches, $urls)
   define('long_url', $urls[$url_key]['long_url']);
 
   ob_start();
-  include './url_show.php';
+  include './views/url_show.php';
   $content = ob_get_clean();
   respond(200, $content);
 }
@@ -164,7 +164,7 @@ function feature_show($matches, $urls)
 function feature_new()
 {
   ob_start();
-  include './url_new.php';
+  include './views/url_new.php';
   $content = ob_get_clean();
   respond(200, $content);
 }
